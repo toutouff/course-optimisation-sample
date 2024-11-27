@@ -26,4 +26,5 @@ public:
   Color raycast(Ray &r, Ray &camera, int castCount, int maxCastCount);
 
   bool closestIntersection(Ray &r, Intersection &closest, CullingType culling);
+  Color handleReflection(Ray &r, Ray &camera, int castCount, int maxCastCount, Intersection &intersection);
 };
