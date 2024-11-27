@@ -1,12 +1,28 @@
 cmake_minimum_required(VERSION 3.5.0)
 project(raytracer VERSION 0.1.0 LANGUAGES C CXX)
 
+# Set the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+# Find OpenSSL package
 find_package(OpenSSL REQUIRED)
 
+# Add the executable target
 add_executable(raytracer main.cpp)
 
+# Enable fast math for supported compilers (GCC/Clang/MSVC), only in Release builds
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        target_compile_options(raytracer PRIVATE -ffast-math)
+    endif()
+elseif(MSVC)
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        target_compile_options(raytracer PRIVATE /fp:fast)
+    endif()
+endif()
+
+# Include directories for raytracer executable
 target_include_directories(raytracer PUBLIC
                            "${PROJECT_BINARY_DIR}"
                            "${PROJECT_SOURCE_DIR}/src/raymath"
@@ -14,11 +30,13 @@ target_include_directories(raytracer PUBLIC
                            "${PROJECT_SOURCE_DIR}/src/rayscene"
                            )
 
+# Add subdirectories for the modules
 add_subdirectory(./src/raymath)
 add_subdirectory(./src/rayimage)
 add_subdirectory(./src/rayscene)
 add_subdirectory(./src/lodepng)
 
+# Link libraries for raytracer executable
 target_link_libraries(raytracer 
                       PUBLIC 
                       rayscene
@@ -32,7 +50,10 @@ target_link_libraries(raytracer
 enable_testing()
 include(CTest)
 
+# Add the rtx_test executable
 add_executable(rtx_test test.cpp)
+
+# Include directories for rtx_test executable
 target_include_directories(rtx_test PUBLIC
                            "${PROJECT_BINARY_DIR}"
                            "${PROJECT_SOURCE_DIR}/src/raymath"
@@ -40,6 +61,7 @@ target_include_directories(rtx_test PUBLIC
                            "${PROJECT_SOURCE_DIR}/src/rayscene"
                            )
 
+# Link libraries for rtx_test executable
 target_link_libraries(rtx_test 
                       PUBLIC 
                       rayscene
@@ -53,24 +75,17 @@ target_link_libraries(rtx_test
 set(TEST_WORKING_DIR ${CMAKE_SOURCE_DIR})
 
 # Add the scene-specific tests with proper working directory
-
-
 add_test(NAME TEST_TWO_SPHERES
          COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
-
 
 add_test(NAME TEST_TWO_SPHERES2
          COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
 
-
 add_test(NAME TEST_TWO_SPHERES3
          COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
-
 
 add_test(NAME TEST_TWO_SPHERES4
          COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
 
-
 add_test(NAME TEST_TWO_SPHERES5
          COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
-
