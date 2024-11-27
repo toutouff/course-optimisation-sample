@@ -2,6 +2,12 @@
 #include <cmath>
 #include "Vector3.hpp"
 
+
+// Fast reciprocal
+inline double reciprocal(double val) {
+    return val != 0.0 ? 1.0 / val : 0.0;
+}
+
 Vector3::Vector3() : x(0), y(0), z(0)
 {
 }
@@ -41,14 +47,11 @@ const Vector3 Vector3::operator*(double const &f) const
   return c;
 }
 
-const Vector3 Vector3::operator/(double const &f) const
-{
-  Vector3 c;
-  c.x = x / f;
-  c.y = y / f;
-  c.z = z / f;
-  return c;
+const Vector3 Vector3::operator/(double const &f) const {
+    const double recip = reciprocal(f);
+    return Vector3(x * recip, y * recip, z * recip);
 }
+
 
 Vector3 &Vector3::operator=(Vector3 const &vec)
 {
@@ -58,26 +61,37 @@ Vector3 &Vector3::operator=(Vector3 const &vec)
   return *this;
 }
 
-double Vector3::length() const
-{
-  return std::sqrt(this->lengthSquared());
+double Vector3::length() const {
+    const double lenSq = lengthSquared();
+
+    // Handle edge case for very small vectors
+    if (lenSq <= COMPARE_ERROR_CONSTANT) {
+        return 0.0;
+    }
+
+        return std::sqrt(lenSq);  // Standard sqrt calculation
 }
+
 
 double Vector3::lengthSquared() const
 {
   return (x * x + y * y + z * z);
 }
 
-const Vector3 Vector3::normalize() const
-{
-  double length = this->length();
+const Vector3 Vector3::normalize() const {
+    const double lenSq = lengthSquared();
 
-  if (length == 0)
-  {
-    return Vector3();
-  }
-  return *this / length;
+    // Handle edge case for vectors with a very small magnitude
+    if (lenSq < COMPARE_ERROR_CONSTANT) {
+        return Vector3();  // Return the zero vector if length is too small
+    }
+
+        const double invLen = 1.0 / std::sqrt(lenSq);
+
+    // Return the normalized vector
+    return Vector3(x * invLen, y * invLen, z * invLen);
 }
+
 
 double Vector3::dot(Vector3 const &vec) const
 {
