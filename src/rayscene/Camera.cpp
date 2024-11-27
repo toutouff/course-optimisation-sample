@@ -2,6 +2,7 @@
 #include <cmath>
 #include "Camera.hpp"
 #include "../raymath/Ray.hpp"
+#include <thread>
 
 struct RenderSegment
 {
@@ -65,6 +66,17 @@ void renderSegment(RenderSegment *segment)
 void Camera::render(Image &image, Scene &scene)
 {
 
+#ifdef USE_MULTITHREADING
+  unsigned int numThreads = std::thread::hardware_concurrency();
+  std::vector<std::thread> threads;
+
+  // Log the number of threads being used
+  std::cout << "Using " << numThreads << " threads for rendering." << std::endl;
+#else
+  unsigned int numThreads = 1;
+  std::cout << "Multi-threading is disabled. Using a single thread for rendering." << std::endl;
+#endif
+
   double ratio = (double)image.width / (double)image.height;
   double height = 1.0 / ratio;
 
@@ -73,16 +85,30 @@ void Camera::render(Image &image, Scene &scene)
 
   scene.prepare();
 
-  RenderSegment *seg = new RenderSegment();
-  seg->height = height;
-  seg->image = &image;
-  seg->scene = &scene;
-  seg->intervalX = intervalX;
-  seg->intervalY = intervalY;
-  seg->reflections = Reflections;
-  seg->rowMin = 0;
-  seg->rowMax = image.height;
-  renderSegment(seg);
+  for (unsigned int i = 0; i < numThreads; ++i)
+  {
+    RenderSegment *seg = new RenderSegment();
+    seg->height = height;
+    seg->image = &image;
+    seg->scene = &scene;
+    seg->intervalX = intervalX;
+    seg->intervalY = intervalY;
+    seg->reflections = Reflections;
+    seg->rowMin = i * (image.height / numThreads);
+    seg->rowMax = (i + 1) * (image.height / numThreads);
+#ifdef USE_MULTITHREADING
+    threads.push_back(std::thread(renderSegment, seg));
+#else
+    renderSegment(seg);
+#endif
+  }
+
+#ifdef USE_MULTITHREADING
+  for (auto& thread : threads)
+  {
+    thread.join();
+  }
+#endif
 }
 
 std::ostream &operator<<(std::ostream &_stream, Camera &cam)

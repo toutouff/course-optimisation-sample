@@ -5,6 +5,10 @@ project(raytracer VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+# Set the thread preference to pthread
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
 # Find OpenSSL package
 find_package(OpenSSL REQUIRED)
 
@@ -15,11 +19,21 @@ add_executable(raytracer main.cpp)
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
         target_compile_options(raytracer PRIVATE -ffast-math)
-    endif()
+        endif()
 elseif(MSVC)
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
         target_compile_options(raytracer PRIVATE /fp:fast)
     endif()
+endif()
+
+option(ENABLE_MULTITHREADING "Enable multithreading support" ON)
+message(STATUS "Multithreading support enabled:${ENABLE_MULTITHREADING}")
+# Ajouter une définition de compilateur basée sur l'option
+if(ENABLE_MULTITHREADING)
+    # Ajouter des définitions de compilation pour le multithreading
+    add_definitions(-DUSE_MULTITHREADING)
+else()
+    add_definitions(-DDISABLE_MULTITHREADING)
 endif()
 
 # Include directories for raytracer executable
@@ -36,8 +50,12 @@ add_subdirectory(./src/rayimage)
 add_subdirectory(./src/rayscene)
 add_subdirectory(./src/lodepng)
 
+
+
+
 # Link libraries for raytracer executable
 target_link_libraries(raytracer 
+                    PRIVATE Threads::Threads
                       PUBLIC 
                       rayscene
                       raymath
@@ -53,6 +71,8 @@ include(CTest)
 # Add the rtx_test executable
 add_executable(rtx_test test.cpp)
 
+
+
 # Include directories for rtx_test executable
 target_include_directories(rtx_test PUBLIC
                            "${PROJECT_BINARY_DIR}"
@@ -63,6 +83,7 @@ target_include_directories(rtx_test PUBLIC
 
 # Link libraries for rtx_test executable
 target_link_libraries(rtx_test 
+                    PRIVATE Threads::Threads
                       PUBLIC 
                       rayscene
                       raymath

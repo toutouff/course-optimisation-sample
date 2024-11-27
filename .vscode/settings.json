@@ -73,6 +73,7 @@
     "valarray": "cpp",
     "__tree": "cpp",
     "span": "cpp",
-    "cinttypes": "cpp"
+    "cinttypes": "cpp",
+    "thread": "cpp"
   }
 }

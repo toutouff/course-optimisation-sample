@@ -29,6 +29,11 @@ int main(int argc, char *argv[])
   std::cout << "Rendering " << image->width << "x" << image->height << " pixels..." << std::endl;
 
   auto begin = std::chrono::high_resolution_clock::now();
+
+
+
+
+  
   camera->render(*image, *scene);
   auto end = std::chrono::high_resolution_clock::now();
   auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
