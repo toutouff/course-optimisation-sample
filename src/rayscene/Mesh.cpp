@@ -70,28 +70,29 @@ void Mesh::applyTransform()
 bool Mesh::intersects(Ray &r, Intersection &intersection, CullingType culling)
 {
     Intersection tInter;
+    double closestDistanceSquared = -1;  // Store squared distance for comparison
+    bool hit = false;
 
-    double closestDistance = -1;
-    Intersection closestInter;
     for (int i = 0; i < triangles.size(); ++i)
     {
         if (triangles[i]->intersects(r, tInter, culling))
         {
+            // Compute squared distance to avoid using sqrt
+            double distanceSquared = (tInter.Position - r.GetPosition()).lengthSquared();
 
-            tInter.Distance = (tInter.Position - r.GetPosition()).length();
-            if (closestDistance < 0 || tInter.Distance < closestDistance)
+            // Check if this intersection is closer than the previous ones
+            if (closestDistanceSquared < 0 || distanceSquared < closestDistanceSquared)
             {
-                closestDistance = tInter.Distance;
-                closestInter = tInter;
+                closestDistanceSquared = distanceSquared;
+                intersection = tInter;  // Update the closest intersection
+                hit = true;  // Mark that we found an intersection
+
+                // Early exit if only the first intersection matters
+                // Comment out or remove this if you need to continue processing all triangles
+                // break;
             }
         }
     }
 
-    if (closestDistance < 0)
-    {
-        return false;
-    }
-
-    intersection = closestInter;
-    return true;
+    return hit;  // Return true if we found at least one intersection
 }

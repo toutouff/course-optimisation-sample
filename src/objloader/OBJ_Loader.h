@@ -230,10 +230,12 @@ namespace objl
 		}
 
 		// Vector3 Magnitude Calculation
-		float MagnitudeV3(const Vector3 in)
+		float MagnitudeV3(const Vector3& in)
 		{
-			return (sqrtf(powf(in.X, 2) + powf(in.Y, 2) + powf(in.Z, 2)));
+    		// Avoid using powf, and simply square the components directly
+    		return sqrtf(in.X * in.X + in.Y * in.Y + in.Z * in.Z);
 		}
+
 
 		// Vector3 DotProduct
 		float DotV3(const Vector3 a, const Vector3 b)
