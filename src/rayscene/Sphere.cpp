@@ -20,40 +20,57 @@ void Sphere::applyTransform()
 
 bool Sphere::intersects(Ray &r, Intersection &intersection, CullingType culling)
 {
-  // Vector from ray origin to center of sphere
-  Vector3 OC = center - r.GetPosition();
+    // Vector from ray origin to center of sphere
+    Vector3 OC = center - r.GetPosition();
+    
+    // Project OC onto the ray direction
+    double tca = OC.dot(r.GetDirection());  // Projection length of OC onto the ray direction
 
-  // Project OC onto the ray
-  Vector3 OP = OC.projectOn(r.GetDirection());
+    // If the projection is negative, the sphere is behind the ray, so no intersection
+    if (tca < 0)
+    {
+        return false;
+    }
 
-  // If the OP vector is pointing in the opposite direction of the ray
-  // ... then it is behind the ray origin, ignore the object
-  if (OP.dot(r.GetDirection()) <= 0)
-  {
-    return false;
-  }
+    // Calculate the distance squared from the sphere's center to the perpendicular point on the ray
+    double d2 = OC.lengthSquared() - tca * tca;  // Squared distance from sphere center to ray
+    double radius2 = radius * radius;  // Squared radius
 
-  // P is the corner of the right-angle triangle formed by O-C-P
-  Vector3 P = r.GetPosition() + OP;
+    // If the distance is greater than the radius, no intersection
+    if (d2 > radius2)
+    {
+        return false;
+    }
 
-  // Is the length of CP greater than the radius of the circle ? If yes, no intersection!
-  Vector3 CP = P - center;
-  double distance = CP.length();
-  if (distance > radius)
-  {
-    return false;
-  }
+    // Compute the distance squared from the point of closest approach to the intersection points
+    double thc2 = radius2 - d2;  // Squared distance from closest approach to the intersection point
 
-  // Calculate the exact point of collision: P1
-  double a = sqrt(radius * radius - distance * distance);
-  double t = OP.length() - a;
-  Vector3 P1 = r.GetPosition() + (r.GetDirection() * t);
+    // If thc2 is negative, there's no real intersection
+    if (thc2 < 0)
+    {
+        return false;
+    }
 
-  // Pre-calculate some useful values for rendering
-  intersection.Position = P1;
-  intersection.Mat = this->material;
-  intersection.Normal = (P1 - center).normalize();
+    // Now calculate the exact intersection points: t1 and t2 are the distances along the ray to the intersection points
+    double thc = sqrt(thc2);  // Calculate the square root of thc2 (only now)
+    double t = tca - thc;  // The closest intersection (first hit)
+    if (t < 0) 
+    {
+        t = tca + thc;  // If the closest intersection is behind the ray, take the farthest one
+        if (t < 0) 
+        {
+            return false;  // If both intersections are behind the ray, no intersection
+        }
+    }
 
+    // Calculate the exact intersection point
+    Vector3 P1 = r.GetPosition() + r.GetDirection() * t;
 
-  return true;
+    // Pre-calculate some useful values for rendering
+    intersection.Position = P1;
+    intersection.Mat = this->material;
+    intersection.Normal = (P1 - center).normalize();
+
+    return true;
 }
+
