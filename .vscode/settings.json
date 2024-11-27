@@ -72,6 +72,7 @@
     "map": "cpp",
     "valarray": "cpp",
     "__tree": "cpp",
-    "span": "cpp"
+    "span": "cpp",
+    "cinttypes": "cpp"
   }
 }
