@@ -97,7 +97,7 @@ set(TEST_WORKING_DIR ${CMAKE_SOURCE_DIR})
 
 # Add the scene-specific tests with proper working directory
 add_test(NAME TEST_ISO_SPHERE
-         COMMAND rtx_test iso-sphere-in-plane.json references/iso-sphere-on-plane.png)
+         COMMAND rtx_test iso-sphere-on-plane.json references/iso-sphere-on-plane.png)
 
 # add_test(NAME TEST_TWO_SPHERES2
 #          COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
