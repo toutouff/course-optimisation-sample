@@ -120,5 +120,4 @@ void Mesh::updateBoundingBox()
         
         boundingBox.subsume(triangles[i]->boundingBox);
     }
-    std::cout << "Bounding box updated. Min: " << boundingBox << ", Max: " << boundingBox << std::endl;
 }

@@ -34,3 +34,4 @@ bool Plane::intersects(Ray &r, Intersection &intersection, CullingType culling)
 
   return true;
 }
+
