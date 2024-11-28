@@ -4,6 +4,7 @@
 #include "../raymath/Color.hpp"
 #include "../raymath/Ray.hpp"
 #include "../raymath/Transform.hpp"
+#include "../raymath/AABB.hpp"
 
 class Triangle : public SceneObject
 {
@@ -19,9 +20,10 @@ private:
 public:
   Triangle(Vector3 a, Vector3 b, Vector3 c);
   ~Triangle();
+  AABB boundingBox;
 
   int ID;
-
+  virtual void updateBoundingBox() override{};
   virtual void applyTransform() override;
   virtual bool intersects(Ray &r, Intersection &intersection, CullingType culling) override;
 };

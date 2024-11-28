@@ -65,16 +65,23 @@ void Mesh::applyTransform()
         triangles[i]->transform = transform;
         triangles[i]->applyTransform();
     }
+    updateBoundingBox();
 }
 
 bool Mesh::intersects(Ray &r, Intersection &intersection, CullingType culling)
 {
+    
     Intersection tInter;
     double closestDistanceSquared = -1;  // Store squared distance for comparison
     bool hit = false;
 
     for (int i = 0; i < triangles.size(); ++i)
     {
+        if(triangles[i]->boundingBox.intersects(r))
+        {
+            continue;
+        }
+
         if (triangles[i]->intersects(r, tInter, culling))
         {
             // Compute squared distance to avoid using sqrt
@@ -95,4 +102,23 @@ bool Mesh::intersects(Ray &r, Intersection &intersection, CullingType culling)
     }
 
     return hit;  // Return true if we found at least one intersection
+}
+
+void Mesh::updateBoundingBox()
+{
+    if (triangles.empty())
+    {
+        boundingBox = AABB();
+        return;
+    }
+
+   
+    boundingBox = AABB(triangles[0]->boundingBox);
+
+    for (int i = 1; i < triangles.size(); ++i)
+    {
+        
+        boundingBox.subsume(triangles[i]->boundingBox);
+     
+    }
 }

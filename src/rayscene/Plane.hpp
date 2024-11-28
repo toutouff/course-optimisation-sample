@@ -13,6 +13,6 @@ private:
 public:
   Plane(Vector3 p, Vector3 n);
   ~Plane();
-
+  virtual void updateBoundingBox() override{};
   virtual bool intersects(Ray &r, Intersection &intersection, CullingType culling) override;
 };

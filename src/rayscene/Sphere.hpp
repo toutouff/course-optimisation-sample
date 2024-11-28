@@ -14,6 +14,7 @@ public:
   Sphere(double r);
   ~Sphere();
 
+  virtual void updateBoundingBox() override;
   virtual void applyTransform() override;
   virtual bool intersects(Ray &r, Intersection &intersection, CullingType culling) override;
   void countPrimes();

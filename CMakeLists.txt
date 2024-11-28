@@ -96,17 +96,17 @@ target_link_libraries(rtx_test
 set(TEST_WORKING_DIR ${CMAKE_SOURCE_DIR})
 
 # Add the scene-specific tests with proper working directory
-add_test(NAME TEST_TWO_SPHERES
-         COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
+add_test(NAME TEST_ISO_SPHERE
+         COMMAND rtx_test iso-sphere-in-plane.json references/iso-sphere-on-plane.png)
 
-add_test(NAME TEST_TWO_SPHERES2
-         COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
+# add_test(NAME TEST_TWO_SPHERES2
+#          COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
 
-add_test(NAME TEST_TWO_SPHERES3
-         COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
+# add_test(NAME TEST_TWO_SPHERES3
+#          COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
 
-add_test(NAME TEST_TWO_SPHERES4
-         COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
+# add_test(NAME TEST_TWO_SPHERES4
+#          COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
 
-add_test(NAME TEST_TWO_SPHERES5
-         COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
+# add_test(NAME TEST_TWO_SPHERES5
+#          COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)

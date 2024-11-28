@@ -15,11 +15,17 @@ void Sphere::applyTransform()
 {
   Vector3 c;
   this->center = this->transform.apply(c);
+  updateBoundingBox();
 }
 
 
 bool Sphere::intersects(Ray &r, Intersection &intersection, CullingType culling)
 {
+    if(!boundingBox.intersects(r))
+    {
+        return false;
+    }
+
     // Vector from ray origin to center of sphere
     Vector3 OC = center - r.GetPosition();
     
@@ -43,7 +49,7 @@ bool Sphere::intersects(Ray &r, Intersection &intersection, CullingType culling)
     }
 
     // Compute the distance squared from the point of closest approach to the intersection points
-    double thc2 = radius2 - d2;  // Squared distance from closest approach to the intersection point
+    double thc2 = radius2 - d2;  // Squared dist²ance from closest approach to the intersection point
 
     // If thc2 is negative, there's no real intersection
     if (thc2 < 0)
@@ -74,3 +80,8 @@ bool Sphere::intersects(Ray &r, Intersection &intersection, CullingType culling)
     return true;
 }
 
+
+void Sphere::updateBoundingBox()
+{
+    boundingBox =  AABB(center - Vector3(radius, radius, radius),  center + Vector3(radius, radius, radius));
+}
