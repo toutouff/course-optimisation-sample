@@ -17,6 +17,8 @@ void Triangle::applyTransform()
   tA = this->transform.apply(A);
   tB = this->transform.apply(B);
   tC = this->transform.apply(C);
+
+  updateBoundingBox();
 }
 
 bool Triangle::intersects(Ray &r, Intersection &intersection, CullingType culling)
@@ -81,4 +83,25 @@ bool Triangle::intersects(Ray &r, Intersection &intersection, CullingType cullin
   intersection.Normal = normal;
 
   return true;
+}
+
+void Triangle::updateBoundingBox()
+{
+   
+
+    Vector3 min = Vector3(
+        std::min({tA.x, tB.x, tC.x}),
+        std::min({tA.y, tB.y, tC.y}),
+        std::min({tA.z, tB.z, tC.z})
+    );
+
+    Vector3 max = Vector3(
+        std::max({tA.x, tB.x, tC.x}),
+        std::max({tA.y, tB.y, tC.y}),
+        std::max({tA.z, tB.z, tC.z})
+    );
+
+
+    boundingBox = AABB(min, max);
+
 }

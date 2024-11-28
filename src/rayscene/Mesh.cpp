@@ -70,17 +70,17 @@ void Mesh::applyTransform()
 
 bool Mesh::intersects(Ray &r, Intersection &intersection, CullingType culling)
 {
-    
+    if (!boundingBox.intersects(r))
+    {
+        return false;
+    }
     Intersection tInter;
     double closestDistanceSquared = -1;  // Store squared distance for comparison
     bool hit = false;
 
     for (int i = 0; i < triangles.size(); ++i)
     {
-        if(triangles[i]->boundingBox.intersects(r))
-        {
-            continue;
-        }
+      
 
         if (triangles[i]->intersects(r, tInter, culling))
         {
@@ -119,6 +119,6 @@ void Mesh::updateBoundingBox()
     {
         
         boundingBox.subsume(triangles[i]->boundingBox);
-     
     }
+    std::cout << "Bounding box updated. Min: " << boundingBox << ", Max: " << boundingBox << std::endl;
 }

@@ -23,7 +23,7 @@ public:
   AABB boundingBox;
 
   int ID;
-  virtual void updateBoundingBox() override{};
+  virtual void updateBoundingBox() override;
   virtual void applyTransform() override;
   virtual bool intersects(Ray &r, Intersection &intersection, CullingType culling) override;
 };
