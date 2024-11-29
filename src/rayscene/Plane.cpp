@@ -5,6 +5,13 @@
 
 Plane::Plane(Vector3 p, Vector3 n) : point(p), normal(n)
 {
+  double limit = 1e6; // Large value to bound the plane
+
+  Vector3 minPoint(-limit, -limit, -limit);
+  Vector3 maxPoint(limit, limit, limit);
+
+  boundingBox = AABB(minPoint, maxPoint);
+
 }
 
 Plane::~Plane()
