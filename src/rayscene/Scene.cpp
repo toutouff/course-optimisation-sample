@@ -1,13 +1,16 @@
 #include <iostream>
+#include <limits>
 #include "Scene.hpp"
 #include "Intersection.hpp"
 
-Scene::Scene()
+Scene::Scene()  : bspTree(nullptr)
 {
 }
 
 Scene::~Scene()
 {
+  delete bspTree;
+
   for (int i = 0; i < objects.size(); ++i)
   {
     delete objects[i];
@@ -35,6 +38,8 @@ void Scene::prepare()
   {
     objects[i]->applyTransform();
   }
+  bspTree = new BSPTree(objects, 0);
+
 }
 
 std::vector<Light *> Scene::getLights()
@@ -44,25 +49,36 @@ std::vector<Light *> Scene::getLights()
 
 bool Scene::closestIntersection(Ray &r, Intersection &closest, CullingType culling)
 {
+    std::vector<SceneObject*> potentialObjects;
+
+  if (bspTree)
+  {
+    bspTree->query(r, potentialObjects);
+  }
+  else
+  {
+    potentialObjects = objects;
+  }
+
+  double closestDistance = std::numeric_limits<double>::max();
+  bool found = false;
+
+  for (const auto& object : potentialObjects)
+  {
     Intersection intersection;
-    double closestDistanceSq = -1;  // Use squared distance to avoid sqrt calculation
-
-    for (int i = 0; i < objects.size(); ++i)
+    if (object->intersects(r, intersection, culling))
     {
-        if (objects[i]->intersects(r, intersection, culling))
-        {
-            // Calculate squared distance instead of using length()
-            double distSq = (intersection.Position - r.GetPosition()).lengthSquared();
-
-            if (closestDistanceSq < 0 || distSq < closestDistanceSq)
-            {
-                closestDistanceSq = distSq;
-                closest = intersection;  // Directly assign the intersection to closest
-            }
-        }
+      double distance = (intersection.Position - r.GetPosition()).length();
+      if (distance < closestDistance)
+      {
+        closestDistance = distance;
+        closest = intersection;
+        found = true;
+      }
     }
+  }
 
-    return closestDistanceSq > -1;  // If a valid intersection was found
+  return found;  // If a valid intersection was found
 }
 
 Color Scene::handleReflection(Ray &r, Ray &camera, int castCount, int maxCastCount, Intersection &intersection)

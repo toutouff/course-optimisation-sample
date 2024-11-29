@@ -5,12 +5,16 @@
 #include "../raymath/Color.hpp"
 #include "Light.hpp"
 #include "SceneObject.hpp"
+#include "BSPTree.hpp"
+
 
 class Scene
 {
 private:
   std::vector<SceneObject *> objects;
   std::vector<Light *> lights;
+  BSPTree* bspTree; 
+
 
 public:
   Scene();
