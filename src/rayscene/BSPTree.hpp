@@ -1,35 +1,29 @@
-#pragma once
 #include <vector>
-#include "../raymath/Ray.hpp"
 #include "../raymath/AABB.hpp"
-#include "../raymath/Vector3.hpp"
 #include "SceneObject.hpp"
+#include "../raymath/Ray.hpp"
 
-class BSPTree 
-{
+class BSPTree {
 private:
-    static const int MAX_OBJECTS = 8;   // Maximum objects before splitting
-    static const int MAX_DEPTH = 12;    // Maximum tree depth
+    struct SplitInfo {
+        int axis;
+        double splitPos;
+        double cost;
+    };
 
-    AABB boundingBox;                   // Bounding box for finite objects
-    BSPTree* left;                      // Left child
-    BSPTree* right;                     // Right child
-    std::vector<SceneObject*> planes;   // Infinite planes at this node
-    std::vector<SceneObject*> objects;  // Finite objects at this node
+    AABB boundingBox;
+    BSPTree* left;
+    BSPTree* right;
+    std::vector<SceneObject*> planes;   
+    std::vector<SceneObject*> objects;  
+    static const int MAX_OBJECTS = 8;
+    static const int MAX_DEPTH = 12;
 
-    void buildTree(std::vector<SceneObject*>& finiteObjects, int depth);
-    int chooseSplitAxis() const;
-    double calculateSplitValue(int axis) const;
+    double computeNodeCost() const;
+    SplitInfo findBestSplit(const std::vector<SceneObject*>& objects);
 
 public:
-    BSPTree(std::vector<SceneObject*>& objects, int depth);
-    virtual  ~BSPTree() = default;
-
+    BSPTree(std::vector<SceneObject*>& objs, int depth);
+    ~BSPTree();
     void query(Ray& r, std::vector<SceneObject*>& result);
-    bool intersectsBoundingBox(const Ray& r) const;
-    
-    // Getters for testing/debugging
-    const AABB& getBoundingBox() const { return boundingBox; }
-    const std::vector<SceneObject*>& getPlanes() const { return planes; }
-    const std::vector<SceneObject*>& getObjects() const { return objects; }
 };
