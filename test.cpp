@@ -2,9 +2,29 @@
 #include <filesystem>
 #include <fstream>
 #include <cmath>
+#include <chrono>  // For timing
+#include <iomanip> // For formatting output
+#include <ctime>   // For timestamp
+#include <sstream> // For string stream
 #include <openssl/md5.h>
 #include "SceneLoader.hpp"
 #include "../src/lodepng/lodepng.h"
+
+// Helper function to get timestamp string
+std::string getTimestamp() {
+    auto now = std::chrono::system_clock::now();
+    auto time = std::chrono::system_clock::to_time_t(now);
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&time), "%Y%m%d_%H%M%S");
+    return ss.str();
+}
+
+// Helper function to ensure directory exists
+void ensureDirectoryExists(const std::string& path) {
+    if (!std::filesystem::exists(path)) {
+        std::filesystem::create_directories(path);
+    }
+}
 
 // Helper function to convert MD5 digest to string
 std::string md5ToString(unsigned char* md) {
@@ -64,7 +84,20 @@ std::string loadHashFromFile(const std::string& referenceFile) {
 
 bool testScene(const std::string& sceneFile, const std::string& referenceFile) {
     try {
+        // Start timing
+        auto start_time = std::chrono::high_resolution_clock::now();
+        
         std::cout << "Testing scene: " << sceneFile << std::endl;
+        
+        // Create output directory
+        std::string outputDir = "output_images";
+        ensureDirectoryExists(outputDir);
+        
+        // Extract scene name from path
+        std::string sceneName = std::filesystem::path(sceneFile).stem().string();
+        
+        // Generate timestamp
+        std::string timestamp = getTimestamp();
         
         // Check if files exist
         if (!std::filesystem::exists(sceneFile)) {
@@ -81,10 +114,10 @@ bool testScene(const std::string& sceneFile, const std::string& referenceFile) {
         auto [scene, camera, image] = SceneLoader::Load(sceneFile);
         camera->render(*image, *scene);
         
-        // Save rendered image for debugging
-        std::string debugOutputFile = "debug_rendered.png";
-        image->writeFile(debugOutputFile);
-        std::cout << "Saved rendered image to: " << debugOutputFile << std::endl;
+        // Save rendered image with timestamp
+        std::string renderedImagePath = outputDir + "/" + sceneName + "_rendered_" + timestamp + ".png";
+        image->writeFile(renderedImagePath);
+        std::cout << "Saved rendered image to: " << renderedImagePath << std::endl;
         
         // Calculate hash of rendered image
         std::string renderedHash = getImageHash(image);
@@ -101,10 +134,10 @@ bool testScene(const std::string& sceneFile, const std::string& referenceFile) {
             return false;
         }
         
-        // Save reference image for debugging
-        std::string debugRefFile = "debug_reference.png";
-        lodepng::encode(debugRefFile, refPixels, refWidth, refHeight);
-        std::cout << "Saved reference image to: " << debugRefFile << std::endl;
+        // Save reference image with timestamp
+        std::string referenceImagePath = outputDir + "/" + sceneName + "_reference_" + timestamp + ".png";
+        lodepng::encode(referenceImagePath, refPixels, refWidth, refHeight);
+        std::cout << "Saved reference image to: " << referenceImagePath << std::endl;
         
         // Verify dimensions match
         if(refWidth != image->width || refHeight != image->height) {
@@ -120,7 +153,6 @@ bool testScene(const std::string& sceneFile, const std::string& referenceFile) {
             for(unsigned x = 0; x < refWidth; x++) {
                 size_t idx = 4 * (y * refWidth + x);  // idx points to RGBA values
                 Color color;
-                // Convert to integer first, then to float for all 4 components
                 color.r = static_cast<int>(refPixels[idx]) / 255.0f;
                 color.g = static_cast<int>(refPixels[idx + 1]) / 255.0f;
                 color.b = static_cast<int>(refPixels[idx + 2]) / 255.0f;
@@ -152,7 +184,6 @@ bool testScene(const std::string& sceneFile, const std::string& referenceFile) {
             std::cerr << "Hash mismatch!" << std::endl;
             std::cerr << "Expected: " << storedHash << std::endl;
             std::cerr << "Got     : " << renderedHash << std::endl;
-            std::cerr << "Check debug_rendered.png and debug_reference.png for visual comparison" << std::endl;
             delete referenceImage;
             delete scene;
             delete camera;
@@ -161,6 +192,23 @@ bool testScene(const std::string& sceneFile, const std::string& referenceFile) {
         }
 
         std::cout << "Hashes match!" << std::endl;
+        
+        // Record timing and write to file
+        auto end_time = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+        
+        std::string timingFile = "execution_times.txt";
+        std::ofstream timeLog(timingFile, std::ios::app);
+        if (timeLog.is_open()) {
+            timeLog << std::left << std::setw(30) << std::filesystem::path(sceneFile).filename().string()
+                   << std::right << std::setw(10) << duration.count() 
+                   << " ms" << std::endl;
+            timeLog.close();
+        } else {
+            std::cerr << "Failed to open timing file for writing!" << std::endl;
+        }
+        
+        std::cout << "Execution time: " << duration.count() << " ms" << std::endl;
         
         // Cleanup
         delete scene;
@@ -179,6 +227,18 @@ int main(int argc, char *argv[]) {
     if (argc < 2) {
         std::cerr << "Error: Please provide scene file" << std::endl;
         return 1;
+    }
+
+    // Initialize timing file with header
+    std::string timingFile = "execution_times.txt";
+    std::ofstream timeLog(timingFile, std::ios::trunc);  // Open in truncate mode to clear file
+    if (timeLog.is_open()) {
+        timeLog << std::left << std::setw(30) << "Scene File" 
+               << std::right << std::setw(10) << "Time (ms)" << std::endl;
+        timeLog << std::string(42, '-') << std::endl;
+        timeLog.close();
+    } else {
+        std::cerr << "Failed to create timing file!" << std::endl;
     }
 
     std::string sceneFile = "../scenes/" + std::string(argv[1]);

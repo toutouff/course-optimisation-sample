@@ -99,14 +99,17 @@ set(TEST_WORKING_DIR ${CMAKE_SOURCE_DIR})
 add_test(NAME TEST_ISO_SPHERE
          COMMAND rtx_test iso-sphere-on-plane.json references/iso-sphere-on-plane.png)
 
-# add_test(NAME TEST_TWO_SPHERES2
-#          COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
+add_test(NAME TEST_TWO_SPHERES
+          COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
 
-# add_test(NAME TEST_TWO_SPHERES3
-#          COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
+add_test(NAME MONKEY_ON_PLANE
+          COMMAND rtx_test monkey-on-plane.json references/monkey-on-plane.png)
 
-# add_test(NAME TEST_TWO_SPHERES4
-#          COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
+add_test(NAME SPHERE_GALAXY
+          COMMAND rtx_test sphere-galaxy-on-plane.json references/sphere-galaxy-on-plane.png)
 
-# add_test(NAME TEST_TWO_SPHERES5
-#          COMMAND rtx_test two-spheres-on-plane.json references/two-spheres-on-plane.png)
+add_test(NAME TEST_TWO_TRIANGLES
+         COMMAND rtx_test two-triangles-on-plane.json references/two-triangles-on-plane.png)
+
+add_test(NAME TEST_ALL
+            COMMAND rtx_test all.json references/all.png)

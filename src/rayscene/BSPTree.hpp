@@ -10,7 +10,7 @@ private:
         double splitPos;
         double cost;
     };
-
+    
     AABB boundingBox;
     BSPTree* left;
     BSPTree* right;
