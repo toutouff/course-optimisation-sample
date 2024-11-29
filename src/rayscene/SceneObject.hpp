@@ -26,4 +26,5 @@ public:
   virtual void updateBoundingBox() = 0;
   virtual void applyTransform();
   virtual bool intersects(Ray &r, Intersection &intersection, CullingType culling);
+  virtual bool isPlane() const {return false;}
 };

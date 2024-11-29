@@ -15,4 +15,5 @@ public:
   ~Plane();
   virtual void updateBoundingBox() override{};
   virtual bool intersects(Ray &r, Intersection &intersection, CullingType culling) override;
+  virtual bool isPlane() const override {return true ;};
 };
